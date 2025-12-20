@@ -22,12 +22,17 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
 
+  analogWrite(buzzer_global_pin,0);
+
   pinMode(living_room_pin, OUTPUT);
   pinMode(master_room_pin, OUTPUT);
   pinMode(bathroom_pin, OUTPUT);
   pinMode(kitchen_pin, OUTPUT);
   pinMode(buzzer_global_pin,OUTPUT);
   pinMode(pir_pin_global,INPUT);
+
+
+  
 }
 
 void loop() {
@@ -78,7 +83,7 @@ void parse_and_exec(String command){
 void handle_ack_command(String command)
 {
   if (command.startsWith("ACK:MOTION:")) {
-    digitalWrite(buzzer_global_pin, LOW);
+    analogWrite(buzzer_global_pin,0);
     alarm_active = false;
     Serial.println("ACK received, alarm cleared");
   }
@@ -113,6 +118,6 @@ void handle_light_command(String command)
   void triggerMotionEvent()
   {
     Serial.println("EVENT:MOTION:GLOBAL");
-    digitalWrite(buzzer_global_pin,HIGH);
+    analogWrite(buzzer_global_pin,60);
   }
 

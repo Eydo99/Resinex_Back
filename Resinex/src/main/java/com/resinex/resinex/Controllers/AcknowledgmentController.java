@@ -14,7 +14,8 @@ public class AcknowledgmentController {
     @Autowired
     private MotionService motionService;
     @PostMapping("/ack")
-    public ResponseEntity<?> ack(@RequestBody AckDTO ack) {
+    public ResponseEntity<?> ack() {
+        System.out.println("AcknowledgmentController - ack");
         motionService.acknowledgeAlarm();
         return ResponseEntity.ok().build();
     }
