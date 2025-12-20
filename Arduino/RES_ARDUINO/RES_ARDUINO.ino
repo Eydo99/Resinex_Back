@@ -2,6 +2,11 @@ const int living_room_pin = 3;
 const int master_room_pin = 5;
 const int kitchen_pin = 9;
 const int bathroom_pin = 10;
+const int pir_pin_global=8;
+const int buzzer_global_pin=11;
+bool prev_motion_state=false;
+bool alarm_active=false;
+
 
 String input = "";
 bool stringComplete = false;
@@ -14,6 +19,8 @@ void setup() {
   pinMode(master_room_pin, OUTPUT);
   pinMode(bathroom_pin, OUTPUT);
   pinMode(kitchen_pin, OUTPUT);
+  pinMode(buzzer_global_pin,OUTPUT);
+  pinMode(pir_pin_global,INPUT);
 }
 
 void loop() {
@@ -24,6 +31,15 @@ void loop() {
     input = "";
     stringComplete = false;
   }
+
+  bool current_motion_state=digitalRead(pir_pin_global);
+  if(current_motion_state && !prev_motion_state && !alarm_active)
+  {
+    triggerMotionEvent();
+    alarm_active=true;
+  }
+  prev_motion_state=current_motion_state;
+
 }
 
 void serialEvent() {
@@ -64,3 +80,10 @@ void parse_and_exec(String command){
   }
 
 }
+
+  void triggerMotionEvent()
+  {
+    Serial.println("EVENT:MOTION:GLOBAL");
+    digitalWrite(buzzer_global_pin,HIGH);
+  }
+
