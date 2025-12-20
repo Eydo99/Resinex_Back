@@ -11,6 +11,13 @@ bool alarm_active=false;
 String input = "";
 bool stringComplete = false;
 
+
+void parse_and_exec(String command);
+void handle_ack_command(String command);
+void handle_light_command(String command);
+void triggerMotionEvent();
+
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
@@ -55,16 +62,39 @@ void serialEvent() {
 }
 
 void parse_and_exec(String command){
+  command.trim();
+  if(command.startsWith("ACK:"))
+  {
+    handle_ack_command(command);
+    return;
+  }
+  else
+  {
+    handle_light_command(command);
+  }
+}
+
+
+void handle_ack_command(String command)
+{
+  if (command.startsWith("ACK:MOTION:")) {
+    digitalWrite(buzzer_global_pin, LOW);
+    alarm_active = false;
+    Serial.println("ACK received, alarm cleared");
+  }
+}
+
+
+void handle_light_command(String command)
+{
   int separator_index = command.indexOf(':');
-  
   if (separator_index == -1) return;
 
-  String room_name = command.substring(0 , separator_index);
+  String room_name = command.substring(0, separator_index);
   String value = command.substring(separator_index + 1);
 
   int intensity = value.toInt();
-
-  int pwm_value = map(intensity , 0 , 5 , 0 , 255);
+  int pwm_value = map(intensity, 0, 5, 0, 255);
 
   if (room_name == "Living Room") {
     analogWrite(living_room_pin, pwm_value);
@@ -78,7 +108,6 @@ void parse_and_exec(String command){
   else if (room_name == "Kitchen") {
     analogWrite(kitchen_pin, pwm_value);
   }
-
 }
 
   void triggerMotionEvent()
