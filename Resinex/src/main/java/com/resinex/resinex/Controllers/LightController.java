@@ -19,4 +19,6 @@ public class LightController {
         lightService.sendToSerial(request.getRoom(), request.getIntensity());
     }
 
+
+
 }
