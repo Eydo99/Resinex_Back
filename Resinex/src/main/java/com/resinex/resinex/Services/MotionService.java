@@ -1,7 +1,9 @@
 package com.resinex.resinex.Services;
 
 
+import com.resinex.resinex.Events.MotionDetectedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,6 +18,10 @@ public class MotionService {
     @Autowired
     private SerialService serialService;
 
+    @EventListener
+    public void onMotionEvent(MotionDetectedEvent event) {
+        onMotionDetected(event.getScope());
+    }
 
     public void onMotionDetected(String scope)
     {

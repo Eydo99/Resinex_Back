@@ -1,8 +1,10 @@
 package com.resinex.resinex.Services;
 
 import com.fazecast.jSerialComm.SerialPort;
+import com.resinex.resinex.Events.MotionDetectedEvent;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -16,11 +18,11 @@ public class SerialService {
     private boolean readerStarted=false;
 
     @Autowired
-    private MotionService motionService;
+    private ApplicationEventPublisher publisher;
 
     @PostConstruct
     public void init(){
-        serialPort = SerialPort.getCommPort("COM7");
+        serialPort = SerialPort.getCommPort("COM5");
         serialPort.setBaudRate(9600);
         serialPort.setComPortTimeouts(SerialPort.TIMEOUT_WRITE_BLOCKING, 0, 0);
 
@@ -80,7 +82,8 @@ public class SerialService {
         System.out.println("← Arduino: " + line);
         if(line.startsWith("EVENT:MOTION:"))
         {
-            motionService.onMotionDetected(line.substring("EVENT:MOTION:".length()));
+            String scope = line.substring("EVENT:MOTION:".length());
+            publisher.publishEvent(new MotionDetectedEvent(scope));
         }
     }
 }
