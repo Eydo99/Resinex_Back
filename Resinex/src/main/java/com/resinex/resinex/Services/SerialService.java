@@ -24,7 +24,7 @@ public class SerialService {
 
     @PostConstruct
     public void init() {
-        serialPort = SerialPort.getCommPort("COM5");
+        serialPort = SerialPort.getCommPort("COM3");
         serialPort.setBaudRate(9600);
         // FIXED: Changed from TIMEOUT_WRITE_BLOCKING to TIMEOUT_NONBLOCKING
         serialPort.setComPortTimeouts(SerialPort.TIMEOUT_NONBLOCKING, 0, 0);
@@ -113,7 +113,7 @@ public class SerialService {
     }
 
     private void handleLine(String line) {
-        System.out.println("← Arduino: " + line);
+//        System.out.println("← Arduino: " + line);
         if (line.startsWith("EVENT:MOTION:")) {
             String scope = line.substring("EVENT:MOTION:".length());
             publisher.publishEvent(new MotionDetectedEvent(scope));
@@ -121,7 +121,11 @@ public class SerialService {
         if (line.startsWith("TEMP:")) {
             try {
                 double temp = Double.parseDouble(line.substring("TEMP:".length()));
-                publisher.publishEvent(new TempEvent(temp));
+                if(temp > 0){
+                    publisher.publishEvent(new TempEvent(temp));
+                    System.out.println("Temp temperature: " + temp);
+                }
+
             } catch (NumberFormatException ignored) {}
         }
     }

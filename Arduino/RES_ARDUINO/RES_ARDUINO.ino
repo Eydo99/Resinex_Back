@@ -19,6 +19,9 @@ bool tempAlarmEnabled = true;
 bool tempAlarmActive = false;
 float currentTemp = 0;
 const float TEMP_LIMIT = 35.0;
+unsigned long lastTempRead = 0;
+const unsigned long TEMP_INTERVAL = 2000; 
+
 
 
 void parse_and_exec(String command);
@@ -64,7 +67,11 @@ void loop() {
     alarm_active=true;
   }
   prev_motion_state=current_motion_state;
-  readTemperature();
+  if(millis()-lastTempRead>TEMP_INTERVAL){
+    readTemperature();
+    lastTempRead=millis();
+
+  }
 
 }
 
@@ -151,8 +158,8 @@ void handle_light_command(String command)
 
   void readTemperature() {
   temp_val = analogRead(A0);
-  float mv = (temp_val / 1024.0) * 5000;
-  currentTemp = mv / 10;
+  float mv = (temp_val / 1024.0) * 5000.0;
+  currentTemp = (mv / 10.0);
 
   Serial.print("TEMP:");
   Serial.println(currentTemp);
@@ -166,6 +173,10 @@ void handle_light_command(String command)
     noTone(temp_buzzer_pin);
     tempAlarmActive = false;
   }
+  
+  
 }
+
+
 
 
