@@ -12,6 +12,18 @@ String input = "";
 bool stringComplete = false;
 
 
+
+const int temp_buzzer_pin = 6;
+int temp_val;
+bool tempAlarmEnabled = true;
+bool tempAlarmActive = false;
+float currentTemp = 0;
+const float TEMP_LIMIT = 35.0;
+unsigned long lastTempRead = 0;
+const unsigned long TEMP_INTERVAL = 2000; 
+
+
+
 void parse_and_exec(String command);
 void handle_ack_command(String command);
 void handle_light_command(String command);
@@ -30,6 +42,10 @@ void setup() {
   pinMode(kitchen_pin, OUTPUT);
   pinMode(buzzer_global_pin,OUTPUT);
   pinMode(pir_pin_global,INPUT);
+  pinMode(A0, INPUT);
+  pinMode(temp_buzzer_pin, OUTPUT);
+  noTone(temp_buzzer_pin);
+
 
 
   
@@ -51,6 +67,11 @@ void loop() {
     alarm_active=true;
   }
   prev_motion_state=current_motion_state;
+  if(millis()-lastTempRead>TEMP_INTERVAL){
+    readTemperature();
+    lastTempRead=millis();
+
+  }
 
 }
 
@@ -87,6 +108,20 @@ void handle_ack_command(String command)
     alarm_active = false;
     Serial.println("ACK received, alarm cleared");
   }
+   // Temperature SAFE
+  if (command == "SAFE") {
+    tempAlarmEnabled = false;
+    noTone(temp_buzzer_pin);
+    tempAlarmActive = false;
+    Serial.println("TEMP SAFE");
+    return;
+  }
+
+  // Resume temperature monitoring
+  if (command == "RESUME") {
+    tempAlarmEnabled = true;
+    Serial.println("TEMP RESUME");
+  }
 }
 
 
@@ -120,4 +155,28 @@ void handle_light_command(String command)
     Serial.println("EVENT:MOTION:GLOBAL");
     analogWrite(buzzer_global_pin,60);
   }
+
+  void readTemperature() {
+  temp_val = analogRead(A0);
+  float mv = (temp_val / 1024.0) * 5000.0;
+  currentTemp = (mv / 10.0);
+
+  Serial.print("TEMP:");
+  Serial.println(currentTemp);
+
+  if (tempAlarmEnabled && currentTemp >= TEMP_LIMIT && !tempAlarmActive) {
+    tone(temp_buzzer_pin, 1000);
+    tempAlarmActive = true;
+  }
+
+  if (currentTemp < TEMP_LIMIT && tempAlarmActive && tempAlarmEnabled) {
+    noTone(temp_buzzer_pin);
+    tempAlarmActive = false;
+  }
+  
+  
+}
+
+
+
 

@@ -2,6 +2,7 @@ package com.resinex.resinex.Services;
 
 import com.fazecast.jSerialComm.SerialPort;
 import com.resinex.resinex.Events.MotionDetectedEvent;
+import com.resinex.resinex.Events.TempEvent;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ public class SerialService {
 
     @PostConstruct
     public void init() {
-        serialPort = SerialPort.getCommPort("COM5");
+        serialPort = SerialPort.getCommPort("COM3");
         serialPort.setBaudRate(9600);
         // FIXED: Changed from TIMEOUT_WRITE_BLOCKING to TIMEOUT_NONBLOCKING
         serialPort.setComPortTimeouts(SerialPort.TIMEOUT_NONBLOCKING, 0, 0);
@@ -112,10 +113,20 @@ public class SerialService {
     }
 
     private void handleLine(String line) {
-        System.out.println("← Arduino: " + line);
+//        System.out.println("← Arduino: " + line);
         if (line.startsWith("EVENT:MOTION:")) {
             String scope = line.substring("EVENT:MOTION:".length());
             publisher.publishEvent(new MotionDetectedEvent(scope));
+        }
+        if (line.startsWith("TEMP:")) {
+            try {
+                double temp = Double.parseDouble(line.substring("TEMP:".length()));
+                if(temp > 0){
+                    publisher.publishEvent(new TempEvent(temp));
+                    System.out.println("Temp temperature: " + temp);
+                }
+
+            } catch (NumberFormatException ignored) {}
         }
     }
 }
