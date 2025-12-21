@@ -2,6 +2,7 @@ package com.resinex.resinex.Services;
 
 import com.fazecast.jSerialComm.SerialPort;
 import com.resinex.resinex.Events.MotionDetectedEvent;
+import com.resinex.resinex.Events.TempEvent;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,6 +117,12 @@ public class SerialService {
         if (line.startsWith("EVENT:MOTION:")) {
             String scope = line.substring("EVENT:MOTION:".length());
             publisher.publishEvent(new MotionDetectedEvent(scope));
+        }
+        if (line.startsWith("TEMP:")) {
+            try {
+                double temp = Double.parseDouble(line.substring("TEMP:".length()));
+                publisher.publishEvent(new TempEvent(temp));
+            } catch (NumberFormatException ignored) {}
         }
     }
 }
