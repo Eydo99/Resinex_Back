@@ -104,7 +104,7 @@ void parse_and_exec(String command){
 void handle_ack_command(String command)
 {
   if (command.startsWith("ACK:MOTION:")) {
-    analogWrite(buzzer_global_pin,0);
+    digitalWrite(buzzer_global_pin,LOW);
     alarm_active = false;
     Serial.println("ACK received, alarm cleared");
   }
@@ -153,7 +153,7 @@ void handle_light_command(String command)
   void triggerMotionEvent()
   {
     Serial.println("EVENT:MOTION:GLOBAL");
-    analogWrite(buzzer_global_pin,60);
+    digitalWrite(buzzer_global_pin,HIGH);
   }
 
   void readTemperature() {
