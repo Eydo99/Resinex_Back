@@ -1,6 +1,5 @@
 package com.resinex.resinex.Services;
 
-
 import com.resinex.resinex.Events.MotionDetectedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
@@ -9,8 +8,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class MotionService {
 
-    private boolean alarmOn=false;
-    private  String activeScope="";
+    private boolean alarmOn = false;
+    private String activeScope = "";
 
     @Autowired
     private AlertStreamService alertStreamService;
@@ -23,37 +22,36 @@ public class MotionService {
         onMotionDetected(event.getScope());
     }
 
-    public void onMotionDetected(String scope)
-    {
-        if(isAlarmOn()) return;
+    public void onMotionDetected(String scope) {
+        if (isAlarmOn())
+            return;
 
-        alarmOn=true;
-        activeScope=scope;
-        alertStreamService.send("motion",getActiveScope());
-        System.out.println("onMotionDetection in Room"+getActiveScope());
+        alarmOn = true;
+        activeScope = scope;
+        alertStreamService.send("motion", getActiveScope());
+        System.out.println("onMotionDetection in Room" + getActiveScope());
 
     }
 
-    public void acknowledgeAlarm()
-    {
-        if(!isAlarmOn()) return;
+    public void acknowledgeAlarm() {
+        if (!isAlarmOn())
+            return;
 
-        serialService.sendToSerial("ACK:MOTION:"+getActiveScope());
-        alertStreamService.send("alarmCleared",getActiveScope());
+        serialService.sendToSerial("ACK:MOTION:" + getActiveScope());
+        alertStreamService.send("alarmCleared", getActiveScope());
 
         System.out.println("Alarm acknowledged for " + activeScope);
-        
-        alarmOn=false;
-        activeScope="";
+
+        alarmOn = false;
+        activeScope = "";
     }
 
-    private boolean isAlarmOn()
-    {
+    // Public getters to check current alarm state
+    public boolean isAlarmOn() {
         return alarmOn;
     }
 
-    private String  getActiveScope()
-    {
+    public String getActiveScope() {
         return activeScope;
     }
 
