@@ -2,6 +2,7 @@ package com.resinex.resinex.Controllers;
 
 import com.resinex.resinex.Services.AlertStreamService;
 import com.resinex.resinex.Services.MotionService;
+import com.resinex.resinex.Services.TempService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +23,8 @@ public class AlertStreamController {
 
     @Autowired
     private MotionService motionService;
+    @Autowired
+    private TempService tempService;
 
     @GetMapping("/stream")
     public SseEmitter stream() {

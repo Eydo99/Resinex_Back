@@ -18,9 +18,11 @@ int temp_val;
 bool tempAlarmEnabled = true;
 bool tempAlarmActive = false;
 float currentTemp = 0;
-const float TEMP_LIMIT = 35.0;
+const float TEMP_LIMIT = 50.0;
 unsigned long lastTempRead = 0;
-const unsigned long TEMP_INTERVAL = 2000; 
+const unsigned long TEMP_INTERVAL = 300; 
+unsigned long tempSafeUntil = 0;       // millis() until which buzzer is muted
+const unsigned long SAFE_MUTE_TIME = 5000; // 5 seconds
 
 
 
@@ -89,6 +91,11 @@ void serialEvent() {
 
 void parse_and_exec(String command){
   command.trim();
+  // Temperature commands FIRST
+  if (command == "SAFE" || command == "RESUME") {
+    handle_ack_command(command);
+    return;
+  }
   if(command.startsWith("ACK:"))
   {
     handle_ack_command(command);
@@ -110,12 +117,13 @@ void handle_ack_command(String command)
   }
    // Temperature SAFE
   if (command == "SAFE") {
-    tempAlarmEnabled = false;
-    noTone(temp_buzzer_pin);
-    tempAlarmActive = false;
-    Serial.println("TEMP SAFE");
-    return;
-  }
+  tempSafeUntil = millis() + SAFE_MUTE_TIME; // mute for 5 seconds
+  noTone(temp_buzzer_pin);
+  tempAlarmActive = false;
+
+  Serial.println("TEMP SAFE");
+  return;
+}
 
   // Resume temperature monitoring
   if (command == "RESUME") {
@@ -161,19 +169,23 @@ void handle_light_command(String command)
   float mv = (temp_val / 1024.0) * 5000.0;
   currentTemp = (mv / 10.0);
 
-  Serial.print("TEMP:");
-  Serial.println(currentTemp);
+bool isTempMuted = millis() < tempSafeUntil;
 
-  if (tempAlarmEnabled && currentTemp >= TEMP_LIMIT && !tempAlarmActive) {
-    tone(temp_buzzer_pin, 1000);
-    tempAlarmActive = true;
-  }
+// Send temperature always
+Serial.print("TEMP:");
+Serial.println(currentTemp);
 
-  if (currentTemp < TEMP_LIMIT && tempAlarmActive && tempAlarmEnabled) {
-    noTone(temp_buzzer_pin);
-    tempAlarmActive = false;
-  }
-  
+// Only allow buzzer if NOT muted
+if (!isTempMuted && tempAlarmEnabled && currentTemp >= TEMP_LIMIT && !tempAlarmActive) {
+  tone(temp_buzzer_pin, 1000);
+  tempAlarmActive = true;
+}
+
+// Turn off buzzer if temp drops OR mute is active
+if ((currentTemp < TEMP_LIMIT || isTempMuted) && tempAlarmActive) {
+  noTone(temp_buzzer_pin);
+  tempAlarmActive = false;
+}
   
 }
 

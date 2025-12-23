@@ -24,7 +24,7 @@ public class SerialService {
 
     @PostConstruct
     public void init() {
-        serialPort = SerialPort.getCommPort("COM5");
+        serialPort = SerialPort.getCommPort("COM3");
         serialPort.setBaudRate(9600);
         // FIXED: Changed from TIMEOUT_WRITE_BLOCKING to TIMEOUT_NONBLOCKING
         serialPort.setComPortTimeouts(SerialPort.TIMEOUT_NONBLOCKING, 0, 0);
