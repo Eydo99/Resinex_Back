@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 public class TempService {
     private boolean alarmOn=false; //عشان ميقعدش يولعه كل شوية هى مرة لما يعدى
     private double lastTemp=0;
-    private static final double LIMIT = 35.0;
+    private static final double LIMIT = 50.0;
 
     @Autowired
     private AlertStreamService alertStreamService;
@@ -33,7 +33,7 @@ public class TempService {
         }
     }
     public void acknowledgeAlarm() {
-        if (!alarmOn) return;
+
 
         serialService.sendToSerial("SAFE");   // silence Arduino
         alertStreamService.send("tempCleared", lastTemp);
